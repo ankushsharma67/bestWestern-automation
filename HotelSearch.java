@@ -128,7 +128,7 @@ public class HotelSearch {
 		button_changeSearch.click();
 	}
 	
-	public void enterDetinationAndDatesForChange(){
+	public void enterDetinationAndDatesForChangeAndUpdate(){
 		inputDestination(2);
 		inputDateCheckIn(2);
 		inputDateCheckOut(2);
