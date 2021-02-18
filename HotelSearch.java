@@ -19,6 +19,7 @@ public class HotelSearch {
 	public WebDriverWait wait = new WebDriverWait(driver, 120);
 	String url="https://www.bestwestern.com";
 	String title="Book Direct at Best Western Hotels & Resorts";
+	String destination="";
 	ExcelUtility excel=new ExcelUtility();
 	
 	public HotelSearch(WebDriver driver) {
@@ -41,6 +42,16 @@ public class HotelSearch {
 	public String a_selectDate = "//a[@aria-label='${date}']";
 	@FindBy(how = How.XPATH, using = "//button[text()='Find My Hotel']")
 	public WebElement button_findMyHotel;
+	@FindBy(how = How.XPATH, using = "//ul[@id='google-suggestions']/li[1]")
+	public WebElement list_hotelsugeestions;
+	@FindBy(how = How.XPATH, using = "//div[@class='detail destination']//p[@class='value']")
+	public WebElement div_destinationDetail;
+	@FindBy(how = How.XPATH, using = "//div[@id='no-results']")
+	public WebElement div_noResults;
+	@FindBy(how = How.XPATH, using = "//button[text()='Change Search']")
+	public WebElement button_changeSearch;
+	@FindBy(how = How.XPATH, using = "//button[@id='btn-modify-stay-update']")
+	public WebElement button_update;
 	
 	
 	
@@ -65,26 +76,28 @@ public class HotelSearch {
 		}
 	}
 	
-	public void inputDestination() {
+	public void inputDestination(int row) {
 		HashMap<String, String> actualMap = new HashMap<String, String>();
-		actualMap=excel.readExcelData(System.getProperty("user.dir") + "", "searchData", 1);
+		actualMap=excel.readExcelData(System.getProperty("user.dir") + "", "searchData", row);
+		destination=actualMap.get("destination");
 		input_destination.sendKeys(actualMap.get("destination"));
+		list_hotelsugeestions.click();
 	}
 	
-	public void inputDateCheckIn() {
+	public void inputDateCheckIn(int row) {
 		input_checkInDate.click();
 		wait.until(ExpectedConditions.visibilityOf(input_checkInDateTable));
 		HashMap<String, String> actualMap = new HashMap<String, String>();
-		actualMap=excel.readExcelData(System.getProperty("user.dir") + "", "searchData", 1);
+		actualMap=excel.readExcelData(System.getProperty("user.dir") + "", "searchData", row);
 		WebElement webElement=driver.findElement(By.xpath(a_selectDate.replace("${date}", actualMap.get("checkIn"))));
 		webElement.click();
 	}
 	
-	public void inputDateCheckOut() {
+	public void inputDateCheckOut(int row) {
 		input_checkOutDate.click();
 		wait.until(ExpectedConditions.visibilityOf(input_checkOutDateTable));
 		HashMap<String, String> actualMap = new HashMap<String, String>();
-		actualMap=excel.readExcelData(System.getProperty("user.dir") + "", "searchData", 1);
+		actualMap=excel.readExcelData(System.getProperty("user.dir") + "", "searchData", row);
 		WebElement webElement=driver.findElement(By.xpath(a_selectDate.replace("${date}", actualMap.get("checkOut"))));
 		webElement.click();
 	}
@@ -97,10 +110,29 @@ public class HotelSearch {
 		button_findMyHotel.click();
 	}
 	
-	public void verifyHotelDatesAndDestination() {
-		
+	public void verifyHotelDestinationInSearchPage() {
+		if(!(div_destinationDetail.getText().contains(destination))){
+			Assert.fail("Destination not matching as entered");
+		}
 	}
 	
+	public void verifyHotelCardsAppearing(){
+		if(div_noResults.isDisplayed()){
+			System.out.println("No Results displayed");
+		}else{
+			System.out.println("Results displayed");
+		}
+	}
 	
+	public void clickChangeSearch(){
+		button_changeSearch.click();
+	}
 	
+	public void enterDetinationAndDatesForChange(){
+		inputDestination(2);
+		inputDateCheckIn(2);
+		inputDateCheckOut(2);
+		button_update.click();
+		verifyHotelDestinationInSearchPage();
+	}
 }
